@@ -9,8 +9,8 @@ const TWITCH_WEBHOOKS_HUB = 'https://api.twitch.tv/helix/webhooks/hub';
 const TWITCH_TOPIC_FOLLOWS = 'https://api.twitch.tv/helix/users/follows?first=1&to_id=';
 
 function streamer(req, res) {
-    channelName = req.query.channel;
-    channelId = 0;
+    let channelName = req.query.channel;
+    let channelId = 0;
 
     axios.get(TWITCH_CHANNEL_INFO + channelName)
     .then(response => {
@@ -22,7 +22,14 @@ function streamer(req, res) {
         }
     })
     .catch(handleError.bind(null, "Couldn't get channel info"))
-    .then(subscribeToWebhook)
+    .then(channelId => {
+        return axios.post(TWITCH_WEBHOOKS_HUB, {
+            'hub.mode': 'subscribe',
+            'hub.callback': `http://${globals.HOSTNAME}/webhook/follow/${channelName}`,
+            'hub.topic': TWITCH_TOPIC_FOLLOWS + channelId,
+            'hub.lease_seconds': 60 // TODO
+        })
+    })
     .catch(handleError.bind(null, "Couldn't subscribe to webhook"))
     .then(response => {
         console.log(`Webhook subscribed: ${TWITCH_TOPIC_FOLLOWS + channelId} (${response.statusText})`);
@@ -34,17 +41,8 @@ function streamer(req, res) {
             message: message,
             error: error
         });
+        return Promise.reject(error);
     }
 }
-
-function subscribeToWebhook(channelId) {
-    return axios.post(TWITCH_WEBHOOKS_HUB, {
-        'hub.mode': 'subscribe',
-        'hub.callback': `http://${globals.HOSTNAME}/webhook/follow/${channelName}`,
-        'hub.topic': TWITCH_TOPIC_FOLLOWS + channelId,
-        'hub.lease_seconds': 0 // TODO
-    })
-}
-
 
 module.exports = streamer;

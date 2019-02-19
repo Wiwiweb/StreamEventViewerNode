@@ -1,6 +1,7 @@
 const http = require('http');
 const express = require('express');
 const session = require('express-session');
+const bodyParser = require('body-parser');
 const passport = require('passport');
 const twitchStrategy = require("passport-twitch").Strategy;
 
@@ -14,6 +15,7 @@ const app = express();
 
 app.set('view engine', 'pug');
 
+app.use(bodyParser.json());
 app.use(session({secret: SESSION_SECRET}));
 app.use(passport.initialize());
 app.use(passport.session());
@@ -54,10 +56,22 @@ app.get('/logout', function(req, res) {
     res.redirect('/');
 });
 
-app.get('/streamer', streamer);
+app.get('/streamer', ensureAuthenticated, streamer);
 
-app.post('webhook/follow/:channel_name', ensureAuthenticated, function(req, res) {
-    console.log(`New webhook response: ${req}`);
+app.get('/webhook/follow/:channel_name', function(req, res) {
+    console.log('Webhook validation');
+    console.dir(req.query);
+    if (req.query['hub.challenge']) {
+        res.status(200).send(req.query['hub.challenge'])
+    } else {
+        res.sendStatus(200);
+    }
+});
+
+app.post('/webhook/follow/:channel_name', function(req, res) {
+    console.log('New webhook response');
+    console.dir(req.params);
+    res.sendStatus(200)
 });
 
 app.use(function(req, res) {
