@@ -7,7 +7,7 @@ const twitchStrategy = require("passport-twitch").Strategy;
 const home = require('./home');
 
 const PORT = process.env.PORT || 3000;
-const HOSTNAME = process.env.HOSTNAME || 'localhost';
+const HOSTNAME = process.env.HOSTNAME || 'localhost:' + PORT;
 const SESSION_SECRET = process.env.SESSION_SECRET || 'DjTOYIaTRbKpnF5j6Qu715B6lhUyMRyh';
 const TWITCH_CLIENT_ID = process.env.TWITCH_CLIENT_ID;
 const TWITCH_CLIENT_SECRET = process.env.TWITCH_CLIENT_SECRET;
@@ -23,7 +23,7 @@ app.use(passport.session());
 passport.use(new twitchStrategy({
         clientID: TWITCH_CLIENT_ID,
         clientSecret: TWITCH_CLIENT_SECRET,
-        callbackURL: `http://${HOSTNAME}:${PORT}/login/callback`,
+        callbackURL: `http://${HOSTNAME}/login/callback`,
         scope: "user_read"
     },
     function(accessToken, refreshToken, profile, done) {
@@ -70,7 +70,7 @@ app.use(function(req, res) {
 server = http.createServer(app);
 
 server.listen(PORT, () => {
-    console.log(`Server running at http://${HOSTNAME}:${PORT}/`);
+    console.log(`Server running at http://${HOSTNAME}/`);
 });
 
 function ensureAuthenticated(req, res, next) {
