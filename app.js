@@ -4,13 +4,11 @@ const session = require('express-session');
 const passport = require('passport');
 const twitchStrategy = require("passport-twitch").Strategy;
 
+const globals = require('./globals');
 const home = require('./home');
+const streamer = require('./streamer');
 
-const PORT = process.env.PORT || 3000;
-const HOSTNAME = process.env.HOSTNAME || 'localhost:' + PORT;
 const SESSION_SECRET = process.env.SESSION_SECRET || 'DjTOYIaTRbKpnF5j6Qu715B6lhUyMRyh';
-const TWITCH_CLIENT_ID = process.env.TWITCH_CLIENT_ID;
-const TWITCH_CLIENT_SECRET = process.env.TWITCH_CLIENT_SECRET;
 
 const app = express();
 
@@ -21,9 +19,9 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 passport.use(new twitchStrategy({
-        clientID: TWITCH_CLIENT_ID,
-        clientSecret: TWITCH_CLIENT_SECRET,
-        callbackURL: `http://${HOSTNAME}/login/callback`,
+        clientID: globals.TWITCH_CLIENT_ID,
+        clientSecret: globals.TWITCH_CLIENT_SECRET,
+        callbackURL: `http://${globals.HOSTNAME}/login/callback`,
         scope: "user_read"
     },
     function(accessToken, refreshToken, profile, done) {
@@ -56,21 +54,22 @@ app.get('/logout', function(req, res) {
     res.redirect('/');
 });
 
-app.get('/streamer', ensureAuthenticated, function(req, res) {
-    res.render('streamer');
+app.get('/streamer', streamer);
+
+app.post('webhook/follow/:channel_name', ensureAuthenticated, function(req, res) {
+    console.log(`New webhook response: ${req}`);
 });
 
 app.use(function(req, res) {
     res.status(404).render('error', {
-        message: 'Not Found',
-        error: {}
+        message: 'Not Found'
     });
 });
 
 server = http.createServer(app);
 
-server.listen(PORT, () => {
-    console.log(`Server running at http://${HOSTNAME}/`);
+server.listen(globals.PORT, function() {
+    console.log(`Server running at http://${globals.HOSTNAME}/`);
 });
 
 function ensureAuthenticated(req, res, next) {
@@ -78,7 +77,6 @@ function ensureAuthenticated(req, res, next) {
         return next();
     }
     res.status(401).render('error', {
-        message: 'Unauthorized',
-        error: {}
+        message: 'Unauthorized'
     });
 }
