@@ -56,8 +56,10 @@ app.get('/logout', function(req, res) {
     res.redirect('/');
 });
 
-app.get('/streamer', ensureAuthenticated, streamer);
+// app.get('/streamer', ensureAuthenticated, streamer); // TODO renable authentication
+app.get('/streamer', streamer);
 
+// Twitch webhook subscription validation
 app.get('/webhook/follow/:channel_name', function(req, res) {
     console.log('Webhook validation');
     console.dir(req.query);
@@ -68,9 +70,9 @@ app.get('/webhook/follow/:channel_name', function(req, res) {
     }
 });
 
+// Twitch webhook new event
 app.post('/webhook/follow/:channel_name', function(req, res) {
-    console.log('New webhook response');
-    console.dir(req.params);
+    streamer.addEvent(req.params['channel_name'], req.body);
     res.sendStatus(200)
 });
 
