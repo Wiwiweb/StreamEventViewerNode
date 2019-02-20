@@ -4,7 +4,7 @@ const globals = require('./globals');
 axios.defaults.headers.common['Accept'] = 'application/vnd.twitchtv.v5+json';
 axios.defaults.headers.common['Client-ID'] = globals.TWITCH_CLIENT_ID;
 
-const TWITCH_CHANNEL_INFO = 'https://api.twitch.tv/kraken/users?login=';
+const TWITCH_CHANNEL_INFO = 'https://api.twitch.tv/helix/users?login=';
 const TWITCH_WEBHOOKS_HUB = 'https://api.twitch.tv/helix/webhooks/hub';
 const TWITCH_TOPIC_FOLLOWS = 'https://api.twitch.tv/helix/users/follows?first=1&to_id=';
 
@@ -14,10 +14,10 @@ function streamer(req, res) {
 
     axios.get(TWITCH_CHANNEL_INFO + channelName)
     .then(response => {
-        if (response.data.users.length === 0) {
+        if (response.data.length === 0) {
             return Promise.reject("Channel doesn't exist")
         } else {
-            channelId = response.data.users[0]._id;
+            channelId = response.data[0].id;
             return channelId;
         }
     })
