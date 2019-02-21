@@ -1,5 +1,9 @@
 extends layout
 
+block scripts
+    script(src='/socket.io/socket.io.js')
+    script(src='streamer-client.js')
+
 block content
     h1 Streamer page
     p !{channelName}

@@ -13,6 +13,7 @@
     "express-session": "^1.15.6",
     "passport": "^0.4.0",
     "passport-twitch": "^1.0.3",
-    "pug": "^2.0.3"
+    "pug": "^2.0.3",
+    "socket.io": "^2.2.0"
   }
 }

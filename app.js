@@ -4,10 +4,12 @@ const session = require('express-session');
 const bodyParser = require('body-parser');
 const passport = require('passport');
 const twitchStrategy = require("passport-twitch").Strategy;
+const socket = require('socket.io');
 
 const globals = require('./globals');
 const home = require('./home');
 const streamer = require('./streamer');
+const websockets = require('./websockets');
 
 const SESSION_SECRET = process.env.SESSION_SECRET || 'DjTOYIaTRbKpnF5j6Qu715B6lhUyMRyh';
 
@@ -45,7 +47,7 @@ app.get('/', home);
 
 app.get('/login', passport.authenticate('twitch'));
 
-app.get('/login/callback', passport.authenticate('twitch', {
+app.get('/login/callback', passport.authenticate('twitch', +{
         successRedirect: '/',
         failureRedirect: '/'
     }
@@ -72,7 +74,7 @@ app.get('/webhook/follow/:channel_name', function(req, res) {
 
 // Twitch webhook new event
 app.post('/webhook/follow/:channel_name', function(req, res) {
-    streamer.addEvent(req.params['channel_name'], req.body);
+    streamer.addEvent(req.params['channel_name'], req.body, io);
     res.sendStatus(200)
 });
 
@@ -82,7 +84,15 @@ app.use(function(req, res) {
     });
 });
 
-server = http.createServer(app);
+const server = http.createServer(app);
+const io = socket(server);
+
+// Set socket connections
+io.on('connection', function(socket) {
+    channelName = socket.handshake.query.channel.toLowerCase();
+    console.log(`New socket ${socket.id} joined channel ${channelName}`);
+    socket.join(channelName) // Join socket room for this channel
+});
 
 server.listen(globals.PORT, function() {
     console.log(`Server running at http://${globals.HOSTNAME}/`);

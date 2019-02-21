@@ -13,14 +13,14 @@ const TWITCH_WEBHOOKS_FOLLOWS = 'https://api.twitch.tv/helix/users/follows?first
 // Hash of channel name to array of last 10 events
 let lastEvents = {};
 
-function streamer(req, res) {
+function streamer(req, res, io) {
     let channelName = req.query.channel.toLowerCase();
     let displayName = req.query.channel;
     let channelId = 0;
 
     if (channelName in lastEvents) {
         // We already subscribed to this channel (e.g. someone is already watching it), just render
-        res.render('streamer', {channelName: channelName});
+        res.render('streamer', {channelName: channelName, lastEvents: lastEvents[channelName]});
     } else {
 
         // Get channel id from channel name
@@ -57,7 +57,7 @@ function streamer(req, res) {
             'hub.mode': 'subscribe',
             'hub.callback': `http://${globals.HOSTNAME}/webhook/follow/${channelName}`,
             'hub.topic': TWITCH_WEBHOOKS_FOLLOWS + channelId,
-            'hub.lease_seconds': 20
+            'hub.lease_seconds': 60
         })
     }
 
@@ -70,7 +70,7 @@ function streamer(req, res) {
     }
 }
 
-function addEvent(channelName, raw_event) {
+function addEvent(channelName, raw_event, io) {
     if (channelName in lastEvents) { // Just in case we somehow get a webhook new event without a subscription
         event = decodeFollowerEvent(raw_event.data[0]);
         console.log(`New webhook event: ${event}`);
@@ -79,6 +79,10 @@ function addEvent(channelName, raw_event) {
             lastEvents[channelName].pop();
         }
         console.log(`last_events[${channelName}]: ${lastEvents[channelName]}`);
+
+        // Update event list through websockets
+        io.emit('new event', { event: 'test' });
+        io.to(channelName).emit('new event', event);
     } else {
         console.log('Webhook event without a subscription!');
     }
