@@ -11,13 +11,14 @@ const TWITCH_WEBHOOKS_HUB = 'https://api.twitch.tv/helix/webhooks/hub';
 const TWITCH_WEBHOOKS_FOLLOWS = 'https://api.twitch.tv/helix/users/follows?first=1&to_id=';
 
 // Hash of channel name to array of last 10 events
-let last_events = {};
+let lastEvents = {};
 
 function streamer(req, res) {
     let channelName = req.query.channel.toLowerCase();
+    let displayName = req.query.channel;
     let channelId = 0;
 
-    if (channelName in last_events) {
+    if (channelName in lastEvents) {
         // We already subscribed to this channel (e.g. someone is already watching it), just render
         res.render('streamer', {channelName: channelName});
     } else {
@@ -29,6 +30,7 @@ function streamer(req, res) {
             if (response.data.data.length === 0) {
                 return Promise.reject("Channel doesn't exist")
             } else {
+                displayName = response.data.data[0].display_name;
                 channelId = response.data.data[0].id;
                 // Call followers API to pre-populate list of 10 latest events
                 // Simultaneously subscribe to followers webhook using channel id
@@ -41,8 +43,8 @@ function streamer(req, res) {
             webhookResponse = results[1];
             console.log(`Webhook subscribed: ${TWITCH_WEBHOOKS_FOLLOWS + channelId} (${webhookResponse.statusText})`);
             console.log(`New event list for ${channelName}`);
-            last_events[channelName] = recentFollowsEvents.map(raw_event => decodeFollowerEvent(raw_event));
-            res.render('streamer', {channelName: channelName});
+            lastEvents[channelName] = recentFollowsEvents.map(raw_event => decodeFollowerEvent(raw_event));
+            res.render('streamer', {channelName: displayName, lastEvents: lastEvents[channelName]});
         });
     }
 
@@ -69,14 +71,14 @@ function streamer(req, res) {
 }
 
 function addEvent(channelName, raw_event) {
-    if (channelName in last_events) { // Just in case we somehow get a webhook new event without a subscription
+    if (channelName in lastEvents) { // Just in case we somehow get a webhook new event without a subscription
         event = decodeFollowerEvent(raw_event.data[0]);
         console.log(`New webhook event: ${event}`);
-        last_events[channelName].unshift(event);
-        if (last_events[channelName].length > MAX_EVENTS_TO_DISPLAY) {
-            last_events[channelName].pop();
+        lastEvents[channelName].unshift(event);
+        if (lastEvents[channelName].length > MAX_EVENTS_TO_DISPLAY) {
+            lastEvents[channelName].pop();
         }
-        console.log(`last_events[${channelName}]: ${last_events[channelName]}`);
+        console.log(`last_events[${channelName}]: ${lastEvents[channelName]}`);
     } else {
         console.log('Webhook event without a subscription!');
     }

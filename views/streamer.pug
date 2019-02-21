@@ -3,3 +3,6 @@ extends layout
 block content
     h1 Streamer page
     p !{channelName}
+    ul#event-list
+        each event in lastEvents
+            li= event
