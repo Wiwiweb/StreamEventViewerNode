@@ -1,12 +1,13 @@
 extends layout
 
 block scripts
+    script(src='https://embed.twitch.tv/embed/v1.js')
     script(src='/socket.io/socket.io.js')
     script(src='streamer-client.js')
 
 block content
     h1 Streamer page
-    p !{channelName}
+    div#twitch-embed
     ul#event-list
         each event in lastEvents
             li= event

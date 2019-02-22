@@ -1,4 +1,5 @@
 let channelName = new URLSearchParams(document.location.search).get('channel');
+
 let socket = io({query: {channel: channelName}}); // Pass the channel name from the URL parameter
 console.log('Connected to socket');
 
@@ -9,4 +10,12 @@ socket.on('new-event', function(event) {
     newLI.appendChild(document.createTextNode(event));
     eventList.removeChild(eventList.lastChild);
     eventList.prepend(newLI);
+});
+
+document.addEventListener("DOMContentLoaded",function() {
+    new Twitch.Embed("twitch-embed", {
+        width: '100%',
+        height: '50%',
+        channel: channelName
+    });
 });
