@@ -46,7 +46,7 @@ app.get('/', home);
 
 app.get('/login', passport.authenticate('twitch'));
 
-app.get('/login/callback', passport.authenticate('twitch', +{
+app.get('/login/callback', passport.authenticate('twitch', {
         successRedirect: '/',
         failureRedirect: '/'
     }

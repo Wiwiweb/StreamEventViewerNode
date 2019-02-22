@@ -20,7 +20,7 @@ function streamer(req, res) {
 
     if (channelName in lastEvents) {
         // We already subscribed to this channel (e.g. someone is already watching it), just render
-        res.render('streamer', {channelName: channelName, lastEvents: lastEvents[channelName]});
+        res.render('streamer', {channelName: displayName, lastEvents: lastEvents[channelName]});
     } else {
 
         // Get channel id from channel name

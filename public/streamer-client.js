@@ -15,7 +15,7 @@ socket.on('new-event', function(event) {
 document.addEventListener("DOMContentLoaded",function() {
     new Twitch.Embed("twitch-embed", {
         width: '100%',
-        height: '50%',
+        height: '100%',
         channel: channelName
     });
 });
