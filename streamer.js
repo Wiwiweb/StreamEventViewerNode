@@ -13,7 +13,7 @@ const TWITCH_WEBHOOKS_FOLLOWS = 'https://api.twitch.tv/helix/users/follows?first
 // Hash of channel name to array of last 10 events
 let lastEvents = {};
 
-function streamer(req, res, io) {
+function streamer(req, res) {
     let channelName = req.query.channel.toLowerCase();
     let displayName = req.query.channel;
     let channelId = 0;
@@ -41,9 +41,10 @@ function streamer(req, res, io) {
         .then(results => {
             recentFollowsEvents = results[0].data.data;
             webhookResponse = results[1];
-            console.log(`Webhook subscribed: ${TWITCH_WEBHOOKS_FOLLOWS + channelId} (${webhookResponse.statusText})`);
-            console.log(`New event list for ${channelName}`);
+            console.log(`Webhook subscribed for channel ${channelName} (id: ${channelId}) (${webhookResponse.statusText})`);
             lastEvents[channelName] = recentFollowsEvents.map(raw_event => decodeFollowerEvent(raw_event));
+
+            // Render the streamer page with the 10 recent followers from the followers API
             res.render('streamer', {channelName: displayName, lastEvents: lastEvents[channelName]});
         });
     }
@@ -74,15 +75,16 @@ function addEvent(channelName, raw_event, io) {
     if (channelName in lastEvents) { // Just in case we somehow get a webhook new event without a subscription
         event = decodeFollowerEvent(raw_event.data[0]);
         console.log(`New webhook event: ${event}`);
+
+        // Update lastEvents
         lastEvents[channelName].unshift(event);
         if (lastEvents[channelName].length > MAX_EVENTS_TO_DISPLAY) {
             lastEvents[channelName].pop();
         }
         console.log(`last_events[${channelName}]: ${lastEvents[channelName]}`);
 
-        // Update event list through websockets
-        io.emit('new event', { event: 'test' });
-        io.to(channelName).emit('new event', event);
+        // Update client event list through websockets
+        io.to(channelName).emit('new-event', event);
     } else {
         console.log('Webhook event without a subscription!');
     }

@@ -9,7 +9,6 @@ const socket = require('socket.io');
 const globals = require('./globals');
 const home = require('./home');
 const streamer = require('./streamer');
-const websockets = require('./websockets');
 
 const SESSION_SECRET = process.env.SESSION_SECRET || 'DjTOYIaTRbKpnF5j6Qu715B6lhUyMRyh';
 
@@ -91,7 +90,7 @@ const io = socket(server);
 io.on('connection', function(socket) {
     channelName = socket.handshake.query.channel.toLowerCase();
     console.log(`New socket ${socket.id} joined channel ${channelName}`);
-    socket.join(channelName) // Join socket room for this channel
+    socket.join(channelName); // Join socket room for this channel
 });
 
 server.listen(globals.PORT, function() {
