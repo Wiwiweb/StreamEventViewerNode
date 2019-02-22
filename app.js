@@ -62,7 +62,7 @@ app.get('/logout', function(req, res) {
 app.get('/streamer', ensureAuthenticated, streamer);
 
 // Twitch webhook subscription validation
-app.get('/webhook/follow/:channel_name', function(req, res) {
+app.get('/webhook/follow/:channelName', function(req, res) {
     console.log('Webhook validation');
     console.dir(req.query);
     if (req.query['hub.challenge']) {
@@ -73,8 +73,8 @@ app.get('/webhook/follow/:channel_name', function(req, res) {
 });
 
 // Twitch webhook new event
-app.post('/webhook/follow/:channel_name', function(req, res) {
-    streamer.addEvent(req.params['channel_name'], req.body, io);
+app.post('/webhook/follow/:channelName', function(req, res) {
+    streamer.addEvent(req.params['channelName'], req.body, io);
     res.sendStatus(200)
 });
 
