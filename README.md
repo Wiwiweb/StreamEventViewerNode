@@ -21,7 +21,7 @@ If every user watching a channel closes their page, the app will unsubscribe to 
 
 ## Assumptions and decisions
 
-Given that the only available topics on the Twitch webhooks are followers and stream state (online/offline), I decided to focus on followers since that is an event fired much more often. But it would not be complicated to integrate stream state events, and also future webhooks.
+Given that the only available topics on the Twitch webhooks related to channels are followers and stream state (online/offline), I decided to focus on followers since that is an event fired much more often. But it would not be complicated to integrate stream state events, and also future webhooks.
 
 I at first assumed "leveraging web sockets and relevant Twitch API" meant the [websockets Twitch API](https://dev.twitch.tv/docs/pubsub/) but that seems to be reserved for the owners of a channel, so that wasn't an option.
 
@@ -53,3 +53,4 @@ To help balance the load, separating the app into a backend (that handles webhoo
 
 All in all the architecture might look like this:
 
+![Graph](https://i.imgur.com/2ziQ4yy.jpg)
