@@ -12,7 +12,7 @@ socket.on('new-event', function(event) {
     eventList.prepend(newLI);
 });
 
-document.addEventListener("DOMContentLoaded",function() {
+document.addEventListener("DOMContentLoaded", function() {
     new Twitch.Embed("twitch-embed", {
         width: '100%',
         height: '100%',

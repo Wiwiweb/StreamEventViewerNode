@@ -6,6 +6,6 @@ block content
     a(href='/logout')
         p Logout
     form(method='GET' action='/streamer')
-        label(for='channel') Channel:
+        label(for='channel') Channel:!{' '}
         input#channel.form-control(placeholder='Ninja' name='channel')
         button.btn.btn-primary Submit
